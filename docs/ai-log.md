@@ -19,3 +19,17 @@
   checks passed. The demo showed the sold-out refusal, cancellation, and
   first-in-line waitlist name; the benchmark showed `Map.get` substantially
   faster than `Array.find` for the measured lookups.
+
+## Build 2: Event search, sorting, and tests
+
+- **Asked:** Add stable merge sort, publishable event summaries, pure event
+  filtering and sorting, acceptance-criteria tests, and an `npm test` script.
+- **What came back:** The source Build 2 document had no S04 publishing
+  criteria written in its placeholder section.
+- **What was wrong and what changed:** Asked for the missing criteria before
+  implementing S04. Used the agreed criteria: publishing requires a ticket
+  tier, a published event appears in the public list, and unpublishing hides
+  it. Added those criteria to the root `docs/build-2.md`. Implemented Build 2
+  in the root project without changing the nested clone.
+- **Checks run:** `npm test` (28 tests), `npm run demo`, `npm run benchmark`,
+  JavaScript syntax checks, and `git diff --check` all passed.

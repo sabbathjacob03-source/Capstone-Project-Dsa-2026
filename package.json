@@ -18,6 +18,7 @@
   },
   "scripts": {
     "demo": "node demo.js",
-    "benchmark": "node scripts/benchmark-lookup.js"
+    "benchmark": "node scripts/benchmark-lookup.js",
+    "test": "node --test ./test"
   }
 }

@@ -1,9 +1,8 @@
 # Event Ticketing and Booking
 
-A terminal-only Build 1 capstone project that models event ticket inventory,
-ticket bookings, cancellations, and a first-in-first-out waitlist. It uses
-plain JavaScript ES modules and Node.js built-in modules; no third-party
-packages are required.
+A terminal-only capstone project with event inventory, bookings, publishing,
+event search, stable sorting, and automated tests. It uses plain JavaScript ES
+modules and Node.js built-in modules; no third-party packages are required.
 
 ## Requirements
 
@@ -36,11 +35,21 @@ npm run benchmark
 It compares finding bookings in an array with looking them up by reference in
 a `Map`. Array search is O(n); Map lookup is O(1) on average.
 
+Run the automated tests with:
+
+```bash
+npm test
+```
+
+The event search functions filter published event summaries by text, city,
+date, price and availability, then sort them using a stable merge sort.
+
 ## Project structure
 
 ```text
-src/domain/                 Event, inventory, ID, error, and queue logic
-scripts/benchmark-lookup.js Map versus array lookup benchmark
+src/domain/                 Event, inventory, search, sorting, ID, and queue logic
+scripts/                    Lookup benchmark
+test/                       Automated tests using node:test
 demo.js                     Guided terminal demonstration
 package.json                ES module configuration and npm scripts
 docs/ai-log.md              Build-by-build notes on AI-assisted work
@@ -58,4 +67,5 @@ docs/ai-log.md              Build-by-build notes on AI-assisted work
 - The waitlist is a linked-list queue, so enqueueing, peeking, and dequeuing
   take O(1) time.
 
-See [docs/ai-log.md](docs/ai-log.md) for the Build 1 AI-work log.
+See [docs/ai-log.md](docs/ai-log.md) for the AI-work log.
+See [docs/build-2.md](docs/build-2.md) for the Build 2 publishing criteria.

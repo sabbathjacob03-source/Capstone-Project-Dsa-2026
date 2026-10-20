@@ -52,6 +52,13 @@ function requireWholeNumber(value, field, min) {
   return value;
 }
 
+function isValidIsoDate(value) {
+  const datePart = /^(\d{4}-\d{2}-\d{2})(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})?)?$/.exec(value)?.[1];
+  if (!datePart) return false;
+  const calendarDate = new Date(`${datePart}T00:00:00.000Z`);
+  return !Number.isNaN(calendarDate.getTime()) && calendarDate.toISOString().slice(0, 10) === datePart;
+}
+
 function getTier(store, tierId) {
   requireStore(store);
   const normalizedTierId = requireText(tierId, 'Tier id');
@@ -72,7 +79,7 @@ export function createEvent(store, input) {
   const normalizedOrganizerId = requireText(organizerId, 'Organizer id');
   const normalizedStartsAt = requireText(startsAt, 'startsAt');
   const date = new Date(normalizedStartsAt);
-  if (Number.isNaN(date.getTime())) {
+  if (Number.isNaN(date.getTime()) || !isValidIsoDate(normalizedStartsAt)) {
     throw new DomainError('VALIDATION', 'startsAt must be a valid date');
   }
 
@@ -88,6 +95,78 @@ export function createEvent(store, input) {
   };
   store.events.set(event.id, event);
   return event;
+}
+
+export function publishEvent(store, eventId) {
+  requireStore(store);
+  const normalizedEventId = requireText(eventId, 'Event id');
+  const event = store.events.get(normalizedEventId);
+  if (!event) throw new DomainError('NOT_FOUND', 'Event not found');
+  if (!Array.isArray(event.tierIds) || event.tierIds.length === 0) {
+    throw new DomainError('INVALID_STATE', 'An event needs at least one ticket tier before it can be published');
+  }
+  event.status = 'published';
+  return event;
+}
+
+export function unpublishEvent(store, eventId) {
+  requireStore(store);
+  const normalizedEventId = requireText(eventId, 'Event id');
+  const event = store.events.get(normalizedEventId);
+  if (!event) throw new DomainError('NOT_FOUND', 'Event not found');
+  event.status = 'draft';
+  return event;
+}
+
+export function listEventSummaries(store, options = {}) {
+  requireStore(store);
+  if (options === null || typeof options !== 'object' || Array.isArray(options)) {
+    throw new DomainError('VALIDATION', 'options must be an object');
+  }
+  const { publishedOnly = true } = options;
+  if (typeof publishedOnly !== 'boolean') {
+    throw new DomainError('VALIDATION', 'publishedOnly must be a boolean');
+  }
+
+  const summaries = [];
+  for (const event of store.events.values()) {
+    if (publishedOnly && event.status !== 'published') continue;
+    const tiers = event.tierIds.map((tierId) => {
+      const tier = store.tiers.get(tierId);
+      if (!tier) throw new DomainError('INVALID_STATE', 'Event refers to a missing ticket tier');
+      return {
+        id: tier.id,
+        name: tier.name,
+        priceCents: tier.priceCents,
+        capacity: tier.capacity,
+        sold: tier.sold,
+        seatsLeft: seatsLeft(tier),
+      };
+    });
+    const cheapestPriceCents = tiers.reduce(
+      (cheapest, tier) => Math.min(cheapest, tier.priceCents),
+      Infinity,
+    );
+    const availableSeats = tiers.reduce((total, tier) => {
+      const updatedTotal = total + tier.seatsLeft;
+      if (!Number.isSafeInteger(updatedTotal)) {
+        throw new DomainError('INVALID_STATE', 'Event availability exceeds the supported whole-number range');
+      }
+      return updatedTotal;
+    }, 0);
+    summaries.push({
+      id: event.id,
+      title: event.title,
+      city: event.city,
+      venue: event.venue,
+      startsAt: event.startsAt,
+      status: event.status,
+      tiers,
+      cheapestPriceCents: tiers.length > 0 ? cheapestPriceCents : null,
+      availableSeats,
+    });
+  }
+  return summaries;
 }
 
 export function addTier(store, eventId, input) {
