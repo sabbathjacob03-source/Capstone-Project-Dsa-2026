@@ -1,0 +1,23 @@
+{
+  "name": "capstone-project-dsa-2026",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Event Ticketing and Booking - course capstone, built one milestone per Build session",
+  "homepage": "https://github.com/sabbathjacob03-source/Capstone-Project-Dsa-2026#readme",
+  "bugs": {
+    "url": "https://github.com/sabbathjacob03-source/Capstone-Project-Dsa-2026/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sabbathjacob03-source/Capstone-Project-Dsa-2026.git"
+  },
+  "license": "ISC",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "demo": "node demo.js",
+    "benchmark": "node scripts/benchmark-lookup.js"
+  }
+}
